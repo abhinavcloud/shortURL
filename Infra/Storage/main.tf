@@ -22,36 +22,6 @@ resource "aws_s3_bucket_ownership_controls" "site" {
 }
 
 
-data "aws_iam_policy_document" "site_bucket_policy" {
-  statement {
-    sid    = "AllowCloudFrontReadOnly"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-
-    actions   = ["s3:GetObject"]
-    resources = ["${data.terraform_remote_state.storage.outputs.bucket_arn}/*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values = [
-        "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.site.id}"
-      ]
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "site" {
-  bucket = data.terraform_remote_state.storage.outputs.bucket_name
-  policy = data.aws_iam_policy_document.site_bucket_policy.json
-}
-
-
-
 # Create a bucket to hold the lambda function code for createShortURL
 
 # Archiving the createShortURL Python code into a zip file
