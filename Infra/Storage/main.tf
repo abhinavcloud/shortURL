@@ -3,7 +3,7 @@
 data "archive_file" "lambda_create_short_url" {
   type = "zip"
 
-  source_dir  = "${path.module}/lambda_create_short_url"
+  source_dir  = "../../Code/lambda_create_short_url"
   output_path = "${path.module}/create_short_url.zip"
 }
 
