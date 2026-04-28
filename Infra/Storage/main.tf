@@ -8,7 +8,7 @@ data "archive_file" "lambda_create_short_url" {
 }
 
 resource "aws_s3_bucket" "lambda_create_short_url" {
-  bucket = "lambda_create_short_url"
+  bucket = "lambda-short-url-code"
 }
 
 resource "aws_s3_object" "lambda_create_short_url" {
