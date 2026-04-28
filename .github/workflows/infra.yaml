@@ -13,6 +13,10 @@ defaults:
   run:
     working-directory: ./Infra
 
+env:
+  TF_VAR_client_id: ${{secrets.client_id}}
+  TF_VAR_client_secret: ${{secrets.client_secret}}
+
 jobs:
     terraform-plan-apply:
         runs-on: ubuntu-latest

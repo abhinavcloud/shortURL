@@ -19,3 +19,10 @@ module "Cloudfront" {
   bucket_regional_domain_name    = module.Storage.bucket_regional_domain_name
 
 }
+
+module "Authentication" {
+  source = "./Authentication"
+  client_id = var.client_id
+  client_secret = var.client_secret
+
+}
