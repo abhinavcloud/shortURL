@@ -60,5 +60,5 @@ jobs:
               run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page
 
             - name: terraform destroy
-              run: terrafrom destroy -auto-approve
+              run: terraform destroy -auto-approve
                 
