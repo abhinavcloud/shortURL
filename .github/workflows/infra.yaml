@@ -3,11 +3,15 @@ name: Terraform Plan and Apply
 description: This is a reusable workflow designed to initialise terraform and run terraform plan and upload the plan as an artifact
 
 on:
-  push:
+  push
 
 permissions:
   id-token: write
   contents: read 
+
+defaults:
+  run:
+    working-directoty: ./Infra
 
 jobs:
     terraform-plan-apply-reusable:
