@@ -8,7 +8,7 @@ data "archive_file" "lambda_create_short_url" {
 }
 
 resource "aws_s3_object" "lambda_create_short_url" {
-  bucket = aws_s3_bucket.lambda_bucket.id
+  bucket = aws_s3_bucket.lambda_create_short_url.id
 
   key    = "create_short_url.zip"
   source = data.archive_file.lambda_create_short_url.output_path
