@@ -58,4 +58,7 @@ jobs:
             - name: upload website code in S3 bucket
               if: ${{steps.terraform-apply.outcome == 'success'}}
               run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page
+
+            - name: terraform destroy
+              run: terrafrom destroy -auto-approve
                 
