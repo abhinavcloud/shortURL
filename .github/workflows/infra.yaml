@@ -48,9 +48,14 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: teraform-plan-artifact
-                path: ./Infra/tfplan.txt
+                path: ./${{ github.workspace }}/tfplan.txt
                 if-no-files-found: error
 
             - name: terraform-apply
               id: terraform-apply
               run: terraform apply tfplan 
+
+            - name: upload website code in S3 bucket
+              if: ${{steps.terraform-apply.outcome == 'success'}}
+              run: aws s3 sync ${{ github.workspace }}/Code/frontend_website s3://shorturl-website-landing-page
+                
