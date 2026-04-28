@@ -5,7 +5,9 @@ description: This is a reusable workflow designed to initialise terraform and ru
 on:
   push:
 
-      
+permissions:
+  id-token: write
+  contents: read 
 
 jobs:
     terraform-plan-apply-reusable:
