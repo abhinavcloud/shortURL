@@ -21,28 +21,34 @@ resource "aws_s3_bucket_ownership_controls" "site" {
   }
 }
 
-/*
-resource "aws_s3_bucket_policy" "site" {
-  bucket = aws_s3_bucket.site.id
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "cloudfront.amazonaws.com"
-      }
-      Action = "s3:GetObject"
-      Resource = "${aws_s3_bucket.site.arn}/*"
-      Condition = {
-        StringEquals = {
-          "AWS:SourceArn" = aws_cloudfront_distribution.cdn.arn
-        }
-      }
-    }]
-  })
+
+data "aws_iam_policy_document" "site_bucket_policy" {
+  statement {
+    sid    = "AllowCloudFrontReadOnly"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    actions   = ["s3:GetObject"]
+    resources = ["${data.terraform_remote_state.storage.outputs.bucket_arn}/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values = [
+        "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.site.id}"
+      ]
+    }
+  }
 }
 
-*/
+resource "aws_s3_bucket_policy" "site" {
+  bucket = data.terraform_remote_state.storage.outputs.bucket_name
+  policy = data.aws_iam_policy_document.site_bucket_policy.json
+}
 
 
 
