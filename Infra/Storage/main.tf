@@ -7,6 +7,10 @@ data "archive_file" "lambda_create_short_url" {
   output_path = "${path.module}/create_short_url.zip"
 }
 
+resource "aws_s3_bucket" "lambda_create_short_url" {
+  bucket = lambda_create_short_url
+}
+
 resource "aws_s3_object" "lambda_create_short_url" {
   bucket = aws_s3_bucket.lambda_create_short_url.id
 
