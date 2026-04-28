@@ -4,7 +4,7 @@ data "archive_file" "lambda_create_short_url" {
   type = "zip"
 
   source_dir  = "../Code/lambda_create_short_url"
-  output_path = "${path.module}/create_short_url.zip"
+  output_path = "../Code/create_short_url.zip"
 }
 
 resource "aws_s3_bucket" "lambda_create_short_url" {
