@@ -3,20 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture Portfolio | Project Catalog</title>
-    <link rel="stylesheet" href="style.css"> </head>
+    <title>LinkShort | Modern URL Shortener</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/6.3.7/amazon-cognito-identity.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
 
-    <header>
-        <h1>Technical Project Gallery</h1>
-        <p>A dynamic display of cloud solutions</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>LinkShort</h1>
+            <div id="auth-status" class="status-badge">Checking connection...</div>
+        </header>
 
-    <main>
-        <div id="product-container" class="grid-layout">
-            <div class="loading-state">Fetching latest projects from API...</div>
-        </div>
-    </main>
+        <section id="view-login" class="card hidden">
+            <h3>Welcome</h3>
+            <p>Please sign in to shorten and manage your links.</p>
+            <button id="btn-login" class="primary-btn">Sign In with Cognito</button>
+        </section>
+
+        <section id="view-home" class="card hidden">
+            <div class="input-section">
+                <label for="longUrl">Paste your long URL</label>
+                <input type="url" id="longUrl" placeholder="https://very-long-link.com/path/to/resource" required>
+                <button id="btn-shorten" class="primary-btn">Shorten URL</button>
+            </div>
+
+            <div id="loading-spinner" class="hidden">Shortening your link...</div>
+
+            <div id="result-area" class="result-card hidden">
+                <p>Your short link is ready:</p>
+                <div class="copy-group">
+                    <a id="display-short-url" href="#" target="_blank"></a>
+                    <button id="btn-copy">Copy</button>
+                </div>
+            </div>
+
+            <p id="error-msg" class="error-text"></p>
+        </section>
+    </div>
 
     <script src="app.js"></script>
 </body>

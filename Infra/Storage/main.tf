@@ -1,7 +1,7 @@
 # Create a bucket to host the frontend website UI
 
 resource "aws_s3_bucket" "site" {
-  bucket = shorturl-website-landing-page
+  bucket = "shorturl-website-landing-page"
 
 }
 
