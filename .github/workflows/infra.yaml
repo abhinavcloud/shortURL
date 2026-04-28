@@ -55,14 +55,14 @@ jobs:
                 path: ./Infra/tfplan.txt
                 if-no-files-found: error
 
-            - name: terraform-apply
-              id: terraform-apply
-              run: terraform apply tfplan 
+#            - name: terraform-apply
+#              id: terraform-apply
+#              run: terraform apply tfplan 
 
-            - name: upload website code in S3 bucket
-              if: ${{steps.terraform-apply.outcome == 'success'}}
-              run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page
+#            - name: upload website code in S3 bucket
+#              if: ${{steps.terraform-apply.outcome == 'success'}}
+#              run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page
 
-            - name: terraform destroy
-              run: terraform destroy -auto-approve
+#            - name: terraform destroy
+#              run: terraform destroy -auto-approve
                 
