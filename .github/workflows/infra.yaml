@@ -1,0 +1,50 @@
+name: Terraform Plan and Apply
+
+description: This is a reusable workflow designed to initialise terraform and run terraform plan and upload the plan as an artifact
+
+on:
+  push:
+
+      
+
+jobs:
+    terraform-plan-apply-reusable:
+        runs-on: ubuntu-latest
+
+        steps:
+
+            - name: Checkout-code
+              uses: actions/checkout@v4
+
+            - name: Setup-aws
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                role-to-assume: ${{secrets.AWS_ARN}}
+                aws-region: ap-south-1
+            
+            - name: setup-terraform
+              uses: hashicorp/setup-terraform@v4
+              with:
+                terraform_version: ">= 1.13.0"
+
+            - name: terraform-init
+              run: terraform init -backend-config=backend.hcl
+
+            - name: terraform-plan
+              run: terraform plan -out=tfplan
+
+            - name: terraform-plan-show
+              run: |
+                    terraform show tfplan > tfplan.txt
+
+
+            - name: upload-tfplan-artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: tfplan
+                path: tfplan.txt
+                if-no-files-found: error
+
+            - name: terraform-apply
+              id: terraform-apply
+              run: terraform apply tfplan 
