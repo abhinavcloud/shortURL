@@ -2,6 +2,7 @@
 
 resource "aws_s3_bucket" "site" {
   bucket = "shorturl-website-landing-page"
+  force_destroy = true
 
 }
 
@@ -36,6 +37,7 @@ data "archive_file" "lambda_create_short_url" {
 
 resource "aws_s3_bucket" "lambda_create_short_url" {
   bucket = "lambda-short-url-code"
+  force_destroy = true
 }
 
 
