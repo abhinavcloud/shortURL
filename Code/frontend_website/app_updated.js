@@ -58,20 +58,26 @@ function checkAuthentication() {
   const token = localStorage.getItem('id_token');
 
   if (token) {
-    el.authStatus.innerText = "● Connected";
+    const userDisplay = getUserDisplayFromToken(token);
+
+    el.authStatus.innerText = userDisplay
+      ? `● Connected • ${userDisplay}`
+      : "● Connected";
+
     el.authStatus.classList.add('connected');
     views.home.classList.remove('hidden');
     views.login.classList.add('hidden');
 
-    if (el.btnLogout) el.btnLogout.classList.remove('hidden');
-
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) btnLogout.classList.remove('hidden');
   } else {
     el.authStatus.innerText = "○ Not Signed In";
     el.authStatus.classList.remove('connected');
     views.login.classList.remove('hidden');
     views.home.classList.add('hidden');
 
-    if (el.btnLogout) el.btnLogout.classList.add('hidden');
+    const btnLogout = document.getElementById('btn-logout');
+    if (btnLogout) btnLogout.classList.add('hidden');
   }
 }
 
@@ -110,6 +116,50 @@ function logout() {
 
   window.location.href = logoutUrl;
 }
+
+
+/**
+ * Decode JWT payload without verifying signature (display-only).
+ * JWT format: header.payload.signature (base64url-encoded)
+ */
+function decodeJwtPayload(token) {
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+
+    const json = decodeURIComponent(
+      atob(padded)
+        .split('')
+        .map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    );
+
+    return JSON.parse(json);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Returns a nice display name/email from token claims
+ */
+function getUserDisplayFromToken(idToken) {
+  const payload = decodeJwtPayload(idToken);
+  if (!payload) return null;
+
+  return (
+    payload.email ||
+    payload.preferred_username ||
+    payload['cognito:username'] ||
+    payload.username ||
+    null
+  );
+}
+
 
 /**
  * Shortening Logic (Backend not implemented yet)

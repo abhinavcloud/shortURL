@@ -444,3 +444,12 @@ input[type="url"]:focus {
   .input-row { grid-template-columns: 1fr; }
   .primary-btn--inline { width: 100%; }
 }
+
+.user-email {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+}
