@@ -92,9 +92,14 @@ jobs:
               run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page --delete
 
             - name: invalidate cloudfront cache
-              run: aws cloudfront create-invalidation \
-                    --distribution-id YOUR_DISTRIBUTION_ID \
-                    --paths "/config.js" "/index.html" "/app.js"
+              if: ${{steps.terraform-apply.outcome == 'success'}}
+              run: |
+                     TF_OUT=$(terraform output -json)
+                     DISTRIBUTION_ID=$(echo "$TF_OUT" | jq -r '.distribution_id.value')
+
+                     aws cloudfront create-invalidation \
+                     --distribution-id "${DISTRIBUTION_ID}" \
+                     --paths "/config.js" "/index.html" "/app.js"
 
 
 
