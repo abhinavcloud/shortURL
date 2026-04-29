@@ -91,5 +91,11 @@ jobs:
               if: ${{steps.terraform-apply.outcome == 'success'}}
               run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page --delete
 
+            - name: invalidate cloudfront cache
+              run: aws cloudfront create-invalidation \
+                    --distribution-id YOUR_DISTRIBUTION_ID \
+                    --paths "/config.js" "/index.html" "/app.js"
+
+
 
                 
