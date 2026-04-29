@@ -1,22 +1,9 @@
 /**
  * CONFIGURATION
- * Replace these with your AWS values
+ * Values are generated during CI/CD into config.js
+ * and exposed on window.APP_CONFIG
  */
-const CONFIG = {
-  API_URL: 'https://YOUR_API_ID.execute-api.region.amazonaws.com/prod/create',
-
-  // From aws_cognito_user_pool_domain: https://<prefix>.auth.<region>.amazoncognito.com
-  COGNITO_DOMAIN: 'https://YOUR_AUTH_DOMAIN.auth.region.amazoncognito.com',
-
-  // From aws_cognito_user_pool_client.google_client.id
-  CLIENT_ID: 'YOUR_COGNITO_CLIENT_ID',
-
-  // MUST match callback_urls in Cognito client (you configured /auth/callback)
-  REDIRECT_URI: `${window.location.origin}/auth/callback`,
-
-  // Scopes must align with allowed_oauth_scopes = ["email","openid"]
-  SCOPES: 'openid email'
-};
+const CONFIG = window.APP_CONFIG;
 
 // --- DOM Elements ---
 const views = {
@@ -34,101 +21,36 @@ const el = {
 };
 
 // --- Initialization ---
-window.addEventListener('DOMContentLoaded', async () => {
-  await handleOAuthCallbackIfPresent();   // handles ?code=... on /auth/callback
+window.addEventListener('DOMContentLoaded', () => {
+  handleAuthCallbackIfPresent();  // handles /auth/callback#id_token=...
   checkAuthentication();
   setupListeners();
 });
 
 /**
- * ==============
- * AUTH: Code Flow with PKCE
- * ==============
- *
- * Flow:
- * 1) Login button -> redirect to /oauth2/authorize with response_type=code + PKCE challenge
- * 2) Cognito redirects back to REDIRECT_URI with ?code=...
- * 3) JS exchanges code at /oauth2/token to obtain tokens
- * 4) Store tokens in localStorage
+ * Handles the Hosted UI redirect for implicit flow:
+ * Cognito redirects back to REDIRECT_URI with tokens in the URL hash.
+ * (Allowed because your user pool client enables "implicit") [3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_client)
  */
+function handleAuthCallbackIfPresent() {
+  const hash = window.location.hash;
 
-// ---------- PKCE helpers ----------
-function base64UrlEncode(buffer) {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
+  if (hash && hash.includes('id_token=')) {
+    const params = new URLSearchParams(hash.replace('#', '?'));
+    const idToken = params.get('id_token');
+    const accessToken = params.get('access_token');
 
-function randomString(length = 64) {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-  const randomValues = crypto.getRandomValues(new Uint8Array(length));
-  return Array.from(randomValues).map(v => charset[v % charset.length]).join('');
-}
+    if (idToken) localStorage.setItem('id_token', idToken);
+    if (accessToken) localStorage.setItem('access_token', accessToken);
 
-async function sha256(plain) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  return await crypto.subtle.digest('SHA-256', data);
-}
-
-async function createPkcePair() {
-  const verifier = randomString(64);
-  const challenge = base64UrlEncode(await sha256(verifier));
-  return { verifier, challenge };
-}
-
-// ---------- Step 2: Handle callback ----------
-async function handleOAuthCallbackIfPresent() {
-  const url = new URL(window.location.href);
-
-  // We expect /auth/callback?code=... for code flow
-  const code = url.searchParams.get('code');
-  const error = url.searchParams.get('error');
-
-  if (error) {
-    showError(`Login failed: ${error}`);
-    return;
-  }
-
-  if (!code) return;
-
-  // Exchange code for tokens
-  try {
-    const verifier = localStorage.getItem('pkce_verifier');
-    if (!verifier) throw new Error('Missing PKCE verifier in storage');
-
-    const tokenEndpoint = `${CONFIG.COGNITO_DOMAIN}/oauth2/token`;
-
-    const body = new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: CONFIG.CLIENT_ID,
-      code,
-      redirect_uri: CONFIG.REDIRECT_URI,
-      code_verifier: verifier
-    });
-
-    const resp = await fetch(tokenEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body
-    });
-
-    const tokenData = await resp.json();
-    if (!resp.ok) throw new Error(tokenData.error || 'Token exchange failed');
-
-    // Store tokens
-    localStorage.setItem('id_token', tokenData.id_token);
-    localStorage.setItem('access_token', tokenData.access_token);
-    if (tokenData.refresh_token) localStorage.setItem('refresh_token', tokenData.refresh_token);
-
-    // Cleanup: remove code from URL and PKCE verifier
-    localStorage.removeItem('pkce_verifier');
-    window.history.replaceState({}, document.title, window.location.origin + '/');
-  } catch (e) {
-    showError(e.message || 'Login callback handling failed');
+    // Clean URL (remove hash) and send user to home page
+    window.history.replaceState({}, document.title, window.location.origin + "/");
   }
 }
 
-// ---------- Step 3: Use stored token to set UI ----------
+/**
+ * Updates UI based on whether token exists.
+ */
 function checkAuthentication() {
   const token = localStorage.getItem('id_token');
 
@@ -139,53 +61,63 @@ function checkAuthentication() {
     views.login.classList.add('hidden');
   } else {
     el.authStatus.innerText = "○ Not Signed In";
+    el.authStatus.classList.remove('connected');
     views.login.classList.remove('hidden');
     views.home.classList.add('hidden');
   }
 }
 
-// ---------- Login & Logout ----------
-async function startLogin() {
-  const { verifier, challenge } = await createPkcePair();
-  localStorage.setItem('pkce_verifier', verifier);
+/**
+ * Redirects the browser to Cognito Hosted UI authorize endpoint.
+ * Hosted UI endpoints are on the user pool domain. [1](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-assign-domain.html)[2](https://registry.terraform.io/providers/-/aws/6.0.0/docs/resources/cognito_user_pool_domain)
+ */
+function loginWithGoogle() {
+  // Optional: force Google directly (skip IdP chooser)
+  const identityProvider = "Google";
 
   const authorizeUrl =
     `${CONFIG.COGNITO_DOMAIN}/oauth2/authorize` +
     `?client_id=${encodeURIComponent(CONFIG.CLIENT_ID)}` +
-    `&response_type=code` +
-    `&scope=${encodeURIComponent(CONFIG.SCOPES)}` +
+    `&response_type=token` +
+    `&scope=${encodeURIComponent(CONFIG.SCOPES || "openid email")}` +
     `&redirect_uri=${encodeURIComponent(CONFIG.REDIRECT_URI)}` +
-    `&code_challenge=${encodeURIComponent(challenge)}` +
-    `&code_challenge_method=S256`;
-
-  // If you want to force Google specifically (optional), you can append:
-  // + `&identity_provider=Google`
-  // Your client already supports Google. [1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_client)
+    `&identity_provider=${encodeURIComponent(identityProvider)}`;
 
   window.location.href = authorizeUrl;
 }
 
+/**
+ * Hosted UI logout
+ * logout_uri MUST match one of logout_urls in your user pool client. [3](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_client)
+ */
 function logout() {
   localStorage.removeItem('id_token');
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
 
-  // Cognito hosted UI logout endpoint (works because you configured logout_urls)
   const logoutUrl =
     `${CONFIG.COGNITO_DOMAIN}/logout` +
     `?client_id=${encodeURIComponent(CONFIG.CLIENT_ID)}` +
-    `&logout_uri=${encodeURIComponent(window.location.origin + '/')}`;
+    `&logout_uri=${encodeURIComponent(window.location.origin + "/")}`;
 
   window.location.href = logoutUrl;
 }
 
-// --- Shortening Logic (unchanged, but uses token) ---
+/**
+ * Shortening Logic (Backend not implemented yet)
+ */
 async function handleShorten() {
   const longUrl = el.longUrlInput.value.trim();
   const token = localStorage.getItem('id_token');
 
   if (!token) {
     showError("Please sign in first.");
+    return;
+  }
+
+  // Backend not ready yet: show clean message
+  if (!CONFIG.API_URL || CONFIG.API_URL.startsWith("DUMMY")) {
+    showError("API not implemented yet. Auth is working ✅");
     return;
   }
 
@@ -223,9 +155,9 @@ async function handleShorten() {
 
 // --- Helper Functions ---
 function setupListeners() {
-  document.getElementById('btn-login').onclick = startLogin;
+  document.getElementById('btn-login').onclick = loginWithGoogle;
 
-  // Optional: add a logout button in HTML with id="btn-logout"
+  // Optional logout button (add in HTML if you want)
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) btnLogout.onclick = logout;
 
@@ -255,4 +187,3 @@ function showError(msg) {
 function hideError() {
   el.errorMsg.innerText = "";
 }
-``
