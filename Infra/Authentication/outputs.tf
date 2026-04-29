@@ -10,7 +10,7 @@ output "cognito_client_id" {
 }
 
 output "redirect_uri" {
-  value = "https://${var.cloudfront_domain_name}/auth/callback"
+  value = "https://${var.cloudfront_domain_name}"
 }
 
 

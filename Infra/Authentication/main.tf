@@ -31,8 +31,8 @@ resource "aws_cognito_user_pool_client" "google_client" {
   allowed_oauth_flows                  = ["code", "implicit"]
   allowed_oauth_scopes                 = ["email", "openid"]
 
-  callback_urls                        = ["https://${var.cloudfront_domain_name}/auth/callback", "http://localhost:3000/auth/callback"]
-  logout_urls                          = ["https://${var.cloudfront_domain_name}/", "http://localhost:3000/"]
+  callback_urls                        = ["https://${var.cloudfront_domain_name}", "http://localhost:3000"]
+  logout_urls                          = ["https://${var.cloudfront_domain_name}", "http://localhost:3000"]
   
 
   supported_identity_providers         = ["Google"]
