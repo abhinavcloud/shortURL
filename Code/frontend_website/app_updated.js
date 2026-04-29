@@ -17,7 +17,10 @@ const el = {
   btnCopy: document.getElementById('btn-copy'),
   resultArea: document.getElementById('result-area'),
   shortUrlLink: document.getElementById('display-short-url'),
-  errorMsg: document.getElementById('error-msg')
+  errorMsg: document.getElementById('error-msg'),
+  btnLogout: document.getElementById('btn-logout'),
+  spinner: document.getElementById('loading-spinner')
+
 };
 
 // --- Initialization ---
@@ -59,11 +62,16 @@ function checkAuthentication() {
     el.authStatus.classList.add('connected');
     views.home.classList.remove('hidden');
     views.login.classList.add('hidden');
+
+    if (el.btnLogout) el.btnLogout.classList.remove('hidden');
+
   } else {
     el.authStatus.innerText = "○ Not Signed In";
     el.authStatus.classList.remove('connected');
     views.login.classList.remove('hidden');
     views.home.classList.add('hidden');
+
+    if (el.btnLogout) el.btnLogout.classList.add('hidden');
   }
 }
 
@@ -98,7 +106,7 @@ function logout() {
   const logoutUrl =
     `${CONFIG.COGNITO_DOMAIN}/logout` +
     `?client_id=${encodeURIComponent(CONFIG.CLIENT_ID)}` +
-    `&logout_uri=${encodeURIComponent(window.location.origin + "/")}`;
+    `&logout_uri=${encodeURIComponent(window.location.origin)}`;
 
   window.location.href = logoutUrl;
 }
@@ -178,6 +186,7 @@ function displayResult(url) {
 function setLoading(state) {
   el.btnShorten.disabled = state;
   el.btnShorten.innerText = state ? "Working..." : "Shorten URL";
+  if (el.spinner) el.spinner.classList.toggle('hidden', !state);
 }
 
 function showError(msg) {

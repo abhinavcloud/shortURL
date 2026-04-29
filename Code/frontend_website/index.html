@@ -1,48 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkShort | Modern URL Shortener</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/6.3.7/amazon-cognito-identity.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>LinkShort | Modern URL Shortener</title>
+  <meta name="description" content="Shorten long URLs instantly with LinkShort. Secure sign-in with Cognito and a clean, modern experience." />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/6.3.7/amazon-cognito-identity.min.js"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <!-- Background décor -->
+  <div class="bg-decor" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="grid"></span>
+  </div>
 
-    <div class="container">
-        <header>
-            <h1>LinkShort</h1>
-            <div id="auth-status" class="status-badge">Checking connection...</div>
-        </header>
+  <main class="container">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">LS</div>
+        <div class="brand-text">
+          <h1>LinkShort</h1>
+          <p class="tagline">Clean. Fast. Secure URL shortening.</p>
+        </div>
+      </div>
 
-        <section id="view-login" class="card hidden">
-            <h3>Welcome</h3>
-            <p>Please sign in to shorten and manage your links.</p>
-            <button id="btn-login" class="primary-btn">Sign In with Cognito</button>
-        </section>
+      <div class="top-actions">
+        <div id="auth-status" class="status-badge">Checking connection…</div>
+        <!-- NEW: Logout button (shown only when logged in by JS) -->
+        <button id="btn-logout" class="ghost-btn hidden" type="button" aria-label="Logout">
+          Logout
+        </button>
+      </div>
+    </header>
 
-        <section id="view-home" class="card hidden">
-            <div class="input-section">
-                <label for="longUrl">Paste your long URL</label>
-                <input type="url" id="longUrl" placeholder="https://very-long-link.com/path/to/resource" required>
-                <button id="btn-shorten" class="primary-btn">Shorten URL</button>
-            </div>
+    <!-- Hero -->
+    <section class="hero">
+      <h2 class="hero-title">Turn long links into short, shareable URLs.</h2>
+      <p class="hero-subtitle">
+        Sign in with Cognito to get a secure experience. Paste a link, shorten it, and share instantly.
+      </p>
 
-            <div id="loading-spinner" class="hidden">Shortening your link...</div>
+      <div class="chips" aria-label="Features">
+        <span class="chip">⚡ Instant</span>
+        <span class="chip">🔒 Secure sign-in</span>
+        <span class="chip">✨ Clean UI</span>
+      </div>
+    </section>
 
-            <div id="result-area" class="result-card hidden">
-                <p>Your short link is ready:</p>
-                <div class="copy-group">
-                    <a id="display-short-url" href="#" target="_blank"></a>
-                    <button id="btn-copy">Copy</button>
-                </div>
-            </div>
+    <!-- LOGIN VIEW -->
+    <section id="view-login" class="card hidden" aria-live="polite">
+      <div class="card-header">
+        <h3>Welcome back</h3>
+        <p class="muted">Please sign in to shorten and manage your links.</p>
+      </div>
 
-            <p id="error-msg" class="error-text"></p>
-        </section>
-    </div>
+      <button id="btn-login" class="primary-btn" type="button">
+        Continue with Google (Cognito)
+      </button>
 
-    <script src="config.js"></script>
-    <script src="app_updated.js"></script>
+      <p class="fineprint">
+        By continuing, you agree to a secure authentication flow powered by Amazon Cognito.
+      </p>
+    </section>
+
+    <!-- HOME VIEW -->
+    <section id="view-home" class="card hidden" aria-live="polite">
+      <div class="card-header">
+        <h3>Shorten a URL</h3>
+        <p class="muted">Paste any long URL below — we’ll make it compact and ready to share.</p>
+      </div>
+
+      <div class="input-section">
+        <label for="longUrl">Your long URL</label>
+        <div class="input-row">
+          <input
+            type="url"
+            id="longUrl"
+            placeholder="https://very-long-link.com/path/to/resource"
+            autocomplete="url"
+            required
+          />
+          <button id="btn-shorten" class="primary-btn primary-btn--inline" type="button">
+            Shorten
+          </button>
+        </div>
+
+        <div id="loading-spinner" class="spinner hidden" role="status" aria-live="polite">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="spinner-text">Shortening your link…</span>
+        </div>
+
+        <div id="result-area" class="result-card hidden">
+          <p class="result-title">Your short link is ready</p>
+
+          <div class="copy-group">
+            <a id="display-short-url" href="#" target="_blank" rel="noopener noreferrer"></a>
+            <button id="btn-copy" class="secondary-btn" type="button">Copy</button>
+          </div>
+
+          <p class="hint">Tip: It’s copied in one click — perfect for Slack, email, or docs.</p>
+        </div>
+
+        <p id="error-msg" class="error-text" role="alert"></p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Built with ❤️ on AWS • Cognito Auth • CloudFront + S3
+      </p>
+    </footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app_updated.js"></script>
 </body>
 </html>
