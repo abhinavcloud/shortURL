@@ -65,7 +65,6 @@ jobs:
 
 
             - name: Generate frontend config.js from Terraform outputs
-              working-directory: Root/Infra
               run: |
                   TF_OUT=$(terraform output -json)
                   COGNITO_DOMAIN=$(echo "$TF_OUT" | jq -r '.cognito_domain.value')
