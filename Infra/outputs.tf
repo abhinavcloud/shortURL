@@ -4,6 +4,6 @@ output "cloudfront_domain_name" {
 }
 
 output "google_authorized_redirect_uri" {
-  value = module.Authentication.google_authorized_redirect_uri
+  value       = module.Authentication.google_authorized_redirect_uri
   description = "Google Auth Redirect URI"
 }
