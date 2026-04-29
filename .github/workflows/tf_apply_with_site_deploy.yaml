@@ -1,0 +1,96 @@
+name: Terraform Plan and Apply
+
+description: This is a reusable workflow designed to initialise terraform and run terraform plan and upload the plan as an artifact
+
+on:
+  workflow_dispatch
+
+permissions:
+  id-token: write
+  contents: read 
+
+defaults:
+  run:
+    working-directory: ./Infra
+
+
+
+jobs:
+    terraform-plan-apply:
+        runs-on: ubuntu-latest
+
+        env:
+          TF_VAR_client_id: ${{secrets.client_id}}
+          TF_VAR_client_secret: ${{secrets.client_secret}}
+          TF_VAR_app_name: "shortURL-myapp"
+          TF_VAR_env: "shortURL-myenv"
+        
+        steps:
+
+            - name: Checkout-code
+              uses: actions/checkout@v4
+
+            - name: Setup-aws
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                role-to-assume: ${{secrets.AWS_ARN}}
+                aws-region: ap-south-1
+            
+            - name: setup-terraform
+              uses: hashicorp/setup-terraform@v4
+              with:
+                terraform_version: ">= 1.13.0"
+
+            - name: terraform-init
+              run: terraform init -backend-config=backend.hcl
+
+            - name: terraform-plan
+              run: terraform plan -out=tfplan
+
+            - name: terraform-plan-show
+              run: |
+                    terraform show tfplan > tfplan.txt
+
+
+            - name: upload-tfplan-artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: teraform-plan-artifact
+                path: ./Infra/tfplan.txt
+                if-no-files-found: error
+
+            - name: terraform-apply
+              id: terraform-apply
+              run: terraform apply tfplan 
+
+
+            - name: Generate frontend config.js from Terraform outputs
+              working-directory: Root/Infra
+              run: |
+                  TF_OUT=$(terraform output -json)
+                  COGNITO_DOMAIN=$(echo "$TF_OUT" | jq -r '.cognito_domain.value')
+                  CLIENT_ID=$(echo "$TF_OUT" | jq -r '.cognito_client_id.value')
+                  REDIRECT_URI=$(echo "$TF_OUT" | jq -r '.redirect_uri.value')
+
+                  # API is dummy as of now.
+                  API_URL="DUMMY_NOT_IMPLEMENTED_YET"
+
+                  cat > ../Code/frontend_website/config.js <<EOF
+                  window.APP_CONFIG = {
+                    API_URL: "${API_URL}",
+                    COGNITO_DOMAIN: "${COGNITO_DOMAIN}",
+                    CLIENT_ID: "${CLIENT_ID}",
+                    REDIRECT_URI: "${REDIRECT_URI}",
+                    SCOPES: "openid email"
+                  };
+                  EOF
+
+                  echo "Generated config.js:"
+                  cat ../Code/frontend_website/config.js
+
+            - name: upload website code in S3 bucket
+              if: ${{steps.terraform-apply.outcome == 'success'}}
+              run: aws s3 sync ../Code/frontend_website s3://shorturl-website-landing-page --delete
+
+
+                
