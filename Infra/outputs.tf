@@ -14,3 +14,7 @@ output "cognito_client_id" {
 output "redirect_uri" {
   value = module.Authentication.redirect_uri
 }
+
+output "google_authorized_redirect_uri" {
+  value = module.Authentication.google_authorized_redirect_uri
+}

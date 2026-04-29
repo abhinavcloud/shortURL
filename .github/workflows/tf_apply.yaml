@@ -22,8 +22,8 @@ jobs:
         env:
           TF_VAR_client_id: ${{secrets.client_id}}
           TF_VAR_client_secret: ${{secrets.client_secret}}
-          TF_VAR_app_name: "shortURL-myapp"
-          TF_VAR_env: "shortURL-myenv"
+          TF_VAR_app_name: "myapp-abhinavcloud"
+          TF_VAR_env: "myenv-abhinavcloud"
         
         steps:
 
