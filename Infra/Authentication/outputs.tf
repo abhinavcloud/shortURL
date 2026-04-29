@@ -5,7 +5,7 @@ data "aws_region" "current" {}
 
 locals {
   # Cognito Hosted UI base URL (AWS-hosted domain prefix)
-  cognito_hosted_ui_base_url = "https://${aws_cognito_user_pool_domain.google_domain.domain}.auth.${data.aws_region.current}.amazoncognito.com"
+  cognito_hosted_ui_base_url = "https://${aws_cognito_user_pool_domain.google_domain.domain}.auth.${data.aws_region.current.region}.amazoncognito.com"
 
   # This is the exact Redirect URI you must put into Google OAuth Client
   google_authorized_redirect_uri = "${local.cognito_hosted_ui_base_url}/oauth2/idpresponse"
