@@ -23,3 +23,9 @@ output "redirect_uri" {
 output "google_authorized_redirect_uri" {
   value = module.Authentication.google_authorized_redirect_uri
 }
+
+output "base_url" {
+  description = "Base URL for API Gateway stage."
+
+  value = module.APIGateway.base_url
+}
