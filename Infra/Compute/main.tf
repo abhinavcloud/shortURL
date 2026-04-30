@@ -31,7 +31,7 @@ resource "aws_lambda_function" "lambda_create_short_url" {
   filename      = data.archive_file.lambda_create_short_url.output_path
   function_name = "lambda_create_short_url"
   role          = aws_iam_role.lambda_role.arn
-  handler       = "index.handler"
+  handler       = "lambda_create_short_url.handler"
   code_sha256   = data.archive_file.lambda_create_short_url.output_base64sha256
 
   runtime = "python3.12"
@@ -85,7 +85,7 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
         ]
         Resource = [
           aws_dynamodb_table.short_urls.arn,
-          "${dynamodb_table_arn}/index/*"
+          "${var.dynamodb_table_arn}/index/*"
         ]
       }
     ]
