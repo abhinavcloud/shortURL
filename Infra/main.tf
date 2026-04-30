@@ -40,7 +40,7 @@ module "Compute" {
 
   dynamodb_table_name = module.DynamoDB.dynamodb_table_name
 
-  cloudfront_domain_name = module.CloudFront.domain_name
+  cloudfront_domain_name = module.Cloudfront.domain_name
 
 
 }
@@ -50,7 +50,7 @@ module "APIGateway" {
   source = "./APIGateway"
 
   function_name = module.Compute.function_name
-  
+
 
   integration_uri = module.Compute.integration_uri
 
