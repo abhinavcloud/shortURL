@@ -70,7 +70,7 @@ jobs:
                   COGNITO_DOMAIN=$(echo "$TF_OUT" | jq -r '.cognito_domain.value')
                   CLIENT_ID=$(echo "$TF_OUT" | jq -r '.cognito_client_id.value')
                   REDIRECT_URI=$(echo "$TF_OUT" | jq -r '.redirect_uri.value')
-                  API_URL=$(echo "$TF_OUT" | jq -r '.base_url.value')
+                  API_URL=$(echo "$TF_OUT" | jq -r '.create_url_endpoint.value')
 
                   cat > ../Code/frontend_website/config.js <<EOF
                   window.APP_CONFIG = {

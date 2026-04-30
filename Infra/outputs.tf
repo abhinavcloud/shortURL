@@ -29,3 +29,8 @@ output "base_url" {
 
   value = module.APIGateway.base_url
 }
+
+output "create_url_endpoint" {
+  description = "POST endpoint for creating a short URL"
+  value       = module.APIGateway.create_url_endpoint
+}
