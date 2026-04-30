@@ -33,7 +33,7 @@ module "Authentication" {
 
 }
 
-module "DyamoDB" {
+module "DynamoDB" {
   source = "./DynamoDB"
 }
 
