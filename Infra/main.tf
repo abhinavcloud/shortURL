@@ -38,8 +38,9 @@ module "Compute" {
 }
 
 module "APIGateway" {
+  
   source = "./APIGateway"
 
-  function_name = module.Compute.function_name
+  function = module.Compute.function_name
 
 }

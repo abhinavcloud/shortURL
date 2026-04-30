@@ -31,7 +31,7 @@ resource "aws_apigatewayv2_stage" "shorturl" {
 resource "aws_apigatewayv2_integration" "shorturl" {
   api_id = aws_apigatewayv2_api.shorturl.id
 
-  integration_uri    = "aws_lambda_function.${var.function_name}.invoke_arn"
+  integration_uri    = "aws_lambda_function.${var.function}.invoke_arn"
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
 }
@@ -52,7 +52,7 @@ resource "aws_cloudwatch_log_group" "api_gw" {
 resource "aws_lambda_permission" "api_gw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = "aws_lambda_function.${var.function_name}.function_name"
+  function_name = var.function
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "${aws_apigatewayv2_api.shorturl.execution_arn}/*/*"
