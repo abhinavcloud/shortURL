@@ -44,7 +44,7 @@ module "Compute" {
 
   dynamodb_table_name = module.DynamoDB.dynamodb_table_name
 
-  cloudfront_domain_name = module.Cloudfront.domain_name
+  cloudfront_domain_name = module.Cloudfront.cloudfront_domain_name
 
 
 }

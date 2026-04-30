@@ -84,7 +84,7 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
           "dynamodb:Scan"
         ]
         Resource = [
-          aws_dynamodb_table.short_urls.arn,
+          "${var.dynamodb_table_arn}",
           "${var.dynamodb_table_arn}/index/*"
         ]
       }
