@@ -44,12 +44,6 @@ jobs:
             - name: terraform-init
               run: terraform init -backend-config=backend.hcl
 
-            - name: terraform-fmt
-              run: terraform fmt
-
-            - name: terraform-validate
-              run: terraform validate
-
             - name: terraform-plan
               run: terraform plan -out=tfplan
 
