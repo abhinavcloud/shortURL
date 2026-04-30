@@ -30,9 +30,9 @@ data "archive_file" "lambda_create_short_url" {
 resource "aws_lambda_function" "lambda_create_short_url" {
   filename      = data.archive_file.lambda_create_short_url.output_path
   function_name = "lambda_create_short_url"
-  role          = aws_iam_role.example.arn
+  role          = aws_iam_role.lambda_role.arn
   handler       = "index.handler"
-  code_sha256   = data.archive_file.example.output_base64sha256
+  code_sha256   = data.archive_file.lambda_create_short_url.output_base64sha256
 
   runtime = "python3.12"
 
@@ -47,4 +47,17 @@ resource "aws_lambda_function" "lambda_create_short_url" {
     Environment = "production"
     Application = "example"
   }
+}
+
+
+resource "aws_cloudwatch_log_group" "lambda_create_short_url" {
+  name = "/aws/lambda/${aws_lambda_function.lambda_create_short_url.function_name}"
+
+  retention_in_days = 30
+}
+
+
+resource "aws_iam_role_policy_attachment" "lambda_policy" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }

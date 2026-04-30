@@ -32,3 +32,14 @@ module "Authentication" {
   env      = var.env
 
 }
+
+module "Compute" {
+  source = "./Compute"
+}
+
+module "APIGateway" {
+  source = "./APIGateway"
+
+  function_name = module.Compute.function_name
+
+}
