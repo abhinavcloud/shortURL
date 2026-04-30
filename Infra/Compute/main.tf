@@ -40,6 +40,9 @@ resource "aws_lambda_function" "lambda_create_short_url" {
     variables = {
       ENVIRONMENT = "production"
       LOG_LEVEL   = "info"
+      TABLE_NAME = "${var.dynamodb_table_name}"
+      DOMAIN_NAME = "https://${var.cloudfront_domain_name}"
+
     }
   }
 
@@ -60,4 +63,36 @@ resource "aws_cloudwatch_log_group" "lambda_create_short_url" {
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_policy" "lambda_dynamodb_policy" {
+  name        = "lambda-dynamodb"
+  description = "Allow Lambda to access DynamoDB short URL table"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "DynamoDBAccess"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = [
+          aws_dynamodb_table.short_urls.arn,
+          "${dynamodb_table_arn}/index/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_attach_dynamodb" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
 }

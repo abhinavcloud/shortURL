@@ -35,6 +35,14 @@ module "Authentication" {
 
 module "Compute" {
   source = "./Compute"
+
+  dynamodb_table_arn = module.DynamoDB.dynamodb_table_arn
+
+  dynamodb_table_name = module.DynamoDB.dynamodb_table_name
+
+  cloudfront_domain_name = module.CloudFront.domain_name
+  
+
 }
 
 module "APIGateway" {
