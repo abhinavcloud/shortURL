@@ -44,7 +44,7 @@ resource "aws_apigatewayv2_route" "create_short_url" {
 }
 
 resource "aws_cloudwatch_log_group" "api_gw" {
-  name = "/aws/api_gw/${aws_apigatewayv2_api."${var.function_name}".name}"
+  name = "/aws/api_gw/${aws_apigatewayv2_api.shorturl.name}"
 
   retention_in_days = 30
 }
