@@ -33,6 +33,10 @@ module "Authentication" {
 
 }
 
+module "DyamoDB" {
+  source = "./DynamoDB"
+}
+
 module "Compute" {
   source = "./Compute"
 
@@ -56,3 +60,5 @@ module "APIGateway" {
 
 
 }
+
+
