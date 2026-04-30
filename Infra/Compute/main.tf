@@ -1,5 +1,5 @@
 # IAM role for Lambda execution
-data "aws_iam_policy_document" "assume_role" {
+data "aws_iam_policy_document" "assume_role_lambda" {
   statement {
     effect = "Allow"
 
@@ -12,9 +12,9 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_iam_role" "example" {
-  name               = "lambda_execution_role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+resource "aws_iam_role" "lambda_role" {
+  name               = "lambda_role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_lambda.json
 }
 
 data "archive_file" "lambda_create_short_url" {
@@ -27,14 +27,14 @@ data "archive_file" "lambda_create_short_url" {
 
 
 # Lambda function
-resource "aws_lambda_function" "example" {
+resource "aws_lambda_function" "lambda_create_short_url" {
   filename      = data.archive_file.lambda_create_short_url.output_path
   function_name = "lambda_create_short_url"
   role          = aws_iam_role.example.arn
   handler       = "index.handler"
   code_sha256   = data.archive_file.example.output_base64sha256
 
-  runtime = "nodejs20.x"
+  runtime = "python3.12"
 
   environment {
     variables = {
