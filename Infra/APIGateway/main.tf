@@ -1,6 +1,18 @@
 resource "aws_apigatewayv2_api" "shorturl" {
   name          = "serverless_shorturl_gw"
   protocol_type = "HTTP"
+  
+  cors_configuration {
+    allow_origins = [
+      "https://${var.cloudfront_domain_name}",
+      "http://localhost:3000"
+    ]
+
+    allow_methods = ["OPTIONS", "POST"]
+    allow_headers = ["content-type", "authorization"]
+    max_age       = 86400
+  }
+
 }
 
 resource "aws_apigatewayv2_stage" "shorturl" {

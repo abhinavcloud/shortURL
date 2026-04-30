@@ -58,6 +58,7 @@ module "APIGateway" {
 
   integration_uri = module.Compute.integration_uri
 
+  cloudfront_domain_name = module.Cloudfront.cloudfront_domain_name
 
 }
 
