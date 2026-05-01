@@ -68,6 +68,7 @@ module "APIGateway" {
   region = data.aws_region.current.region
 
   cognito_client_id = module.Authentication.cognito_client_id
+  
 
 }
 
