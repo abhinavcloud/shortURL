@@ -45,6 +45,7 @@ def get_method(event):
             or event.get("httpMethod")
             or "")
 
+
 def get_user_sub(event):
     """
     HTTP API v2 JWT authorizer:
@@ -52,22 +53,25 @@ def get_user_sub(event):
     REST API v1 Cognito authorizer:
       requestContext.authorizer.claims.sub
     """
+    rc = event.get("requestContext", {})
+    auth = rc.get("authorizer", {}) or {}
+
     # HTTP API v2
-    claims = (event.get("requestContext", {})
-                  .get("authorizer", {})
-                  .get("jwt", {})
-                  .get("claims", {}))
-    if isinstance(claims, dict) and claims.get("sub"):
-        return claims.get("sub")
+    jwt = auth.get("jwt", {}) or {}
+    claims = jwt.get("claims", {}) or {}
+    sub = claims.get("sub")
+    if sub:
+        return sub
 
-    # REST API v1
-    claims = (event.get("requestContext", {})
-                  .get("authorizer", {})
-                  .get("claims", {}))
-    if isinstance(claims, dict) and claims.get("sub"):
-        return claims.get("sub")
+    # REST API v1 fallback
+    claims = auth.get("claims", {}) or {}
+    sub = claims.get("sub")
+    if sub:
+        return sub
 
-    return "anonymous"
+    # If no claims, return None (caller decides what to do)
+    return None
+
 
 def lambda_handler(event, context):
     # 0) CORS preflight
@@ -95,7 +99,21 @@ def lambda_handler(event, context):
     short_code = encode_base62(int(url_hash[:8], 16))
 
     # 4) Get user_id from authorizer claims (safe for HTTP API v2 + REST v1)
+
     user_id = get_user_sub(event)
+    if not user_id:
+        return {
+            "statusCode": 401,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type,Authorization",
+                "Access-Control-Allow-Methods": "OPTIONS,POST",
+                "Content-Type": "application/json",
+            },
+            "body": json.dumps({"error": "Unauthorized - no JWT claims found"})
+        }
+
+
 
     # 5) Save to DynamoDB
     try:

@@ -13,3 +13,13 @@ variable "cloudfront_domain_name" {
     type = string
     description = "CloudFront Domain Name"
 }
+
+variable "region" {
+    type = string
+    description = "Region Name"
+}
+
+variable "cognito_user_pool_id" {
+    type = string
+    description = "Cognito User Pool Id"
+}

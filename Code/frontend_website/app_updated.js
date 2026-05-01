@@ -55,7 +55,7 @@ function handleAuthCallbackIfPresent() {
  * Updates UI based on whether token exists.
  */
 function checkAuthentication() {
-  const token = localStorage.getItem('id_token');
+  const token = localStorage.getItem('access_token');
 
   if (token) {
     const userDisplay = getUserDisplayFromToken(token);

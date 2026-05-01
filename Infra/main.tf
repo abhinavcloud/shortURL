@@ -6,6 +6,8 @@ provider "archive" {
 
 }
 
+data "aws_region" "current" {}
+
 
 module "Storage" {
   source = "./Storage/"
@@ -59,6 +61,11 @@ module "APIGateway" {
   integration_uri = module.Compute.integration_uri
 
   cloudfront_domain_name = module.Cloudfront.cloudfront_domain_name
+
+
+  cognito_user_pool_id = module.Authentication.cognito_user_pool_id
+
+  region = data.aws_region.current.name
 
 }
 

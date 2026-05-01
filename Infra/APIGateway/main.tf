@@ -48,11 +48,31 @@ resource "aws_apigatewayv2_integration" "shorturl" {
   integration_method = "POST"
 }
 
+
+# JWT authorizer for Cognito User Pool
+resource "aws_apigatewayv2_authorizer" "cognito_jwt" {
+  api_id          = aws_apigatewayv2_api.shorturl.id
+  name            = "cognito-jwt-authorizer"
+  authorizer_type = "JWT"
+
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    issuer   = "https://cognito-idp.${var.region}.amazonaws.com/${var.cognito_user_pool_id}"
+    audience = [aws_cognito_user_pool_client.google_client.id]
+  }
+}
+
 resource "aws_apigatewayv2_route" "create_short_url" {
   api_id = aws_apigatewayv2_api.shorturl.id
 
   route_key = "POST /createUrl"
   target    = "integrations/${aws_apigatewayv2_integration.shorturl.id}"
+
+  
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_jwt.id
+
 }
 
 resource "aws_cloudwatch_log_group" "api_gw" {
@@ -69,3 +89,7 @@ resource "aws_lambda_permission" "api_gw" {
 
   source_arn = "${aws_apigatewayv2_api.shorturl.execution_arn}/*/*"
 }
+
+
+
+

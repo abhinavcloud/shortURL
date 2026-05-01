@@ -18,3 +18,7 @@ output "redirect_uri" {
 output "google_authorized_redirect_uri" {
   value = "https://${aws_cognito_user_pool_domain.google_domain.domain}.auth.${data.aws_region.current.region}.amazoncognito.com/oauth2/idpresponse"
 }
+
+output "cognito_user_pool_id" {
+  value = aws_cognito_user_pool.google.id
+}
