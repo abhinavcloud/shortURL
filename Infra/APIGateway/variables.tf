@@ -23,3 +23,8 @@ variable "cognito_user_pool_id" {
     type = string
     description = "Cognito User Pool Id"
 }
+
+variable "cognito_client_id" {
+    type = string
+    description = "Congnito User Pool Client Id"
+}

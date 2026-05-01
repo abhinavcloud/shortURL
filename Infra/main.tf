@@ -65,7 +65,9 @@ module "APIGateway" {
 
   cognito_user_pool_id = module.Authentication.cognito_user_pool_id
 
-  region = data.aws_region.current.name
+  region = data.aws_region.current.region
+
+  cognito_client_id = module.Authentication.cognito_client_id
 
 }
 
