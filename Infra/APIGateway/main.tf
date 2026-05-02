@@ -92,7 +92,7 @@ resource "aws_apigatewayv2_integration" "get_short_url" {
 
   integration_uri    = var.get_integration_uri
   integration_type   = "AWS_PROXY"
-  integration_method = "GET"
+  integration_method = "POST"
 }
 
 
