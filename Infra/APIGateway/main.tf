@@ -3,11 +3,7 @@ resource "aws_apigatewayv2_api" "shorturl" {
   protocol_type = "HTTP"
   
   cors_configuration {
-    allow_origins = [
-      "https://${var.cloudfront_domain_name}",
-      "http://localhost:3000"
-    ]
-
+    allow_origins = var.allowed_origins
     allow_methods = ["OPTIONS", "POST", "GET"]
     allow_headers = ["content-type", "authorization"]
     max_age       = 86400

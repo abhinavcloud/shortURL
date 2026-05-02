@@ -20,10 +20,6 @@ variable "get_integration_uri" {
     description = "Lambda interation uri for GET /{shortUrlId}"
 }
 
-variable "cloudfront_domain_name" {
-    type = string
-    description = "CloudFront Domain Name"
-}
 
 variable "region" {
     type = string
@@ -38,4 +34,10 @@ variable "cognito_user_pool_id" {
 variable "cognito_client_id" {
     type = string
     description = "Congnito User Pool Client Id"
+}
+
+
+variable "allowed_origins" {
+  description = "CORS allowed origins"
+  type        = list(string)
 }

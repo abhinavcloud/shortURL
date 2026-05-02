@@ -19,7 +19,7 @@ module "Cloudfront" {
   bucket_name                 = module.Storage.bucket_name
   bucket_arn                  = module.Storage.bucket_arn
   bucket_regional_domain_name = module.Storage.bucket_regional_domain_name
-  base_url = module.APIGateway.base_url
+  base_url                    = module.APIGateway.base_url
 
 }
 
@@ -53,10 +53,10 @@ module "Compute" {
 }
 
 module "APIGateway" {
-  
+
   source = "./APIGateway"
 
-  create_function_name = module.Compute.function_name
+  create_function_name = module.Compute.create_function_name
 
   get_function_name = module.Compute.get_function_name
 
@@ -65,15 +65,17 @@ module "APIGateway" {
 
   get_integration_uri = module.Compute.get_integration_uri
 
-  cloudfront_domain_name = module.Cloudfront.cloudfront_domain_name
-
-
+  allowed_origins = [
+    "http://localhost:3000",
+    "https://go.abhinav-cloud.com"
+  ]
+  
   cognito_user_pool_id = module.Authentication.cognito_user_pool_id
 
   region = data.aws_region.current.region
 
   cognito_client_id = module.Authentication.cognito_client_id
-  
+
 
 }
 
