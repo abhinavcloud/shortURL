@@ -4,6 +4,22 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
+
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+
+locals {
+  apigw_invoke_url = trimsuffix(var.base_url, "/")
+
+  apigw_invoke_no_scheme = replace(local.apigw_invoke_url, "https://", "")
+  apigw_domain_name      = split("/", local.apigw_invoke_no_scheme)[0]
+  apigw_stage_name       = split("/", local.apigw_invoke_no_scheme)[1]
+  apigw_origin_path      = "/${local.apigw_stage_name}"
+}
+
+
 resource "aws_cloudfront_origin_access_control" "site_oac" {
   name                              = "shorturl-site-oac"
   description                       = "OAC for private S3 origin"
@@ -22,6 +38,36 @@ resource "aws_cloudfront_distribution" "site" {
     origin_id                = "s3-${var.bucket_name}"
     origin_access_control_id = aws_cloudfront_origin_access_control.site_oac.id
   }
+  
+  origin {
+    domain_name = local.apigw_domain_name
+    origin_id   = "apigw-shorturl"
+    origin_path = local.apigw_origin_path
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  
+  ordered_cache_behavior {
+    path_pattern           = "/r/*"
+    target_origin_id       = "apigw-shorturl"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
+
+    compress        = true
+
+    # Redirect responses should not be cached while you're iterating/debugging
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_disabled.id
+  }
+
+
 
   default_cache_behavior {
     target_origin_id       = "s3-${var.bucket_name}"

@@ -1,12 +1,23 @@
-variable "function_name" {
+variable "create_function_name" {
 type = string
 description = "Lambda Function Name"
 
 }
 
-variable "integration_uri" {
+variable "get_function_name" {
+    type = string  
+    description = "Lambda Function Name for GET /{shortUrlId}"
+
+}
+
+variable "create_integration_uri" {
     type = string
     description = "Lambda interation uri"
+}
+
+variable "get_integration_uri" {
+    type = string
+    description = "Lambda interation uri for GET /{shortUrlId}"
 }
 
 variable "cloudfront_domain_name" {

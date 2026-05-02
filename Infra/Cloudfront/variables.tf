@@ -12,3 +12,8 @@ variable "bucket_regional_domain_name" {
     description = "Regional domain name"
     type = string
 }
+
+variable "base_url" {
+    description = "Base URL for API Gateway stage."
+    type = string
+}

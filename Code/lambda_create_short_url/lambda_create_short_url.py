@@ -136,6 +136,6 @@ def lambda_handler(event, context):
     # 6) Return Response
     domain = (os.environ.get("DOMAIN_NAME") or "https://my.link").rstrip("/")
     return response(201, {
-        "short_url": f"{domain}/{short_code}",
+        "short_url": f"{domain}/r/{short_code}",
         "short_code": short_code
     })

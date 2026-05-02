@@ -96,3 +96,36 @@ resource "aws_iam_role_policy_attachment" "lambda_attach_dynamodb" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
 }
+
+
+# Data archive for GET /{shortUrlId}
+data "archive_file" "lambda_get_short_url" {
+  type = "zip"
+
+  source_dir  = "../Code/lambda_get_short_url"
+  output_path = "../Code/get_short_url.zip"
+}
+
+# Create a lambda function for GET /{shortUrlId}
+resource "aws_lambda_function" "lambda_get_short_url" {
+  filename      = data.archive_file.lambda_get_short_url.output_path
+  function_name = "lambda_get_short_url"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "lambda_get_short_url.handler"
+  code_sha256   = data.archive_file.lambda_get_short_url.output_base64sha256
+
+  runtime = "python3.12"
+
+  environment {
+    variables = {
+      ENVIRONMENT = "production"
+      LOG_LEVEL   = "info"
+      TABLE_NAME = "${var.dynamodb_table_name}"
+    }
+  }
+
+  tags = {
+    Environment = "production"
+    Application = "example"
+  }
+}

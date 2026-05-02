@@ -19,6 +19,7 @@ module "Cloudfront" {
   bucket_name                 = module.Storage.bucket_name
   bucket_arn                  = module.Storage.bucket_arn
   bucket_regional_domain_name = module.Storage.bucket_regional_domain_name
+  base_url = module.APIGateway.base_url
 
 }
 
@@ -55,10 +56,14 @@ module "APIGateway" {
   
   source = "./APIGateway"
 
-  function_name = module.Compute.function_name
+  create_function_name = module.Compute.function_name
+
+  get_function_name = module.Compute.get_function_name
 
 
-  integration_uri = module.Compute.integration_uri
+  create_integration_uri = module.Compute.create_integration_uri
+
+  get_integration_uri = module.Compute.get_integration_uri
 
   cloudfront_domain_name = module.Cloudfront.cloudfront_domain_name
 
